@@ -1,30 +1,13 @@
-interface Scoreable {
-    readonly totalScore: number;
-    render(): void;
-
-}
-
-interface Foodable {
-    element: HTMLDivElement;
-    clickEventHandler(): void;
-}
-
-interface Foodsable {
-    elements: NodeListOf<HTMLDivElement>;
-    readonly activeElements: HTMLDivElement[];
-    readonly activeElementsScore: number[];
-}
-
-class Score implements Scoreable{
-    private static instance: Score;
+"use strict";
+class Score {
+    constructor() { }
     get totalScore() {
         const foods = Foods.getInstance();
-        return foods.activeElementsScore.reduce((total, score) => total + score, 0)
+        return foods.activeElementsScore.reduce((total, score) => total + score, 0);
     }
-    render(){
-        document.querySelector('.score__number')!.textContent = String(this.totalScore);
+    render() {
+        document.querySelector('.score__number').textContent = String(this.totalScore);
     }
-    private constructor(){}
     //singleton class
     static getInstance() {
         if (!Score.instance) {
@@ -33,9 +16,9 @@ class Score implements Scoreable{
         return Score.instance;
     }
 }
-
-class Food implements Foodable{
-    constructor(public element: HTMLDivElement){
+class Food {
+    constructor(element) {
+        this.element = element;
         element.addEventListener('click', this.clickEventHandler.bind(this));
     }
     clickEventHandler() {
@@ -44,20 +27,22 @@ class Food implements Foodable{
         score.render();
     }
 }
-
-class Foods implements Foodsable {
-    //singleton instance
-    private static instance: Foods;
-    elements = document.querySelectorAll<HTMLDivElement>('.food');
-    private _activeElements: HTMLDivElement[] = [];
-    private _activeElementsScore: number[] = [];
-    get activeElements(){
+class Foods {
+    constructor() {
+        this.elements = document.querySelectorAll('.food');
+        this._activeElements = [];
+        this._activeElementsScore = [];
+        this.elements.forEach(element => {
+            new Food(element);
+        });
+    }
+    get activeElements() {
         this._activeElements = [];
         this.elements.forEach(element => {
             if (element.classList.contains('food--active')) {
                 this._activeElements.push(element);
             }
-        })
+        });
         return this._activeElements;
     }
     get activeElementsScore() {
@@ -67,13 +52,8 @@ class Foods implements Foodsable {
             if (foodScore) {
                 this._activeElementsScore.push(Number(foodScore.textContent));
             }
-        })
+        });
         return this._activeElementsScore;
-    }
-    private constructor(){ 
-        this.elements.forEach(element => {
-            new Food(element);
-        })
     }
     static getInstance() {
         if (!Foods.instance) {
